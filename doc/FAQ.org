@@ -299,53 +299,40 @@ include this on your =dotspacemacs/user-config=.
 (add-hook 'js2-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 #+END_SRC
 
-** Setup =$PATH=?
-Some layers require certain tools to be available on your =$PATH=. This means
-that your =$PATH= must contain the installation paths for those tools. For
-example, if you have installed some tools to =~/.local/bin= and want them to be
-available in Spacemacs, you need to add =~/.local/bin= to your =$PATH=.
+** Setting up your PATH?
+Emacs and some Spacemacs layers make calls to programs other than Emacs to provide 
+some basic functionality. In order for Emacs to find these programs, there are two 
+different aspects of Emacs of which you should be aware.
 
-Users of =bash=, =zsh=, =sh= and other similar shells should add following line
-to their =.bashrc= (=.zshrc=, =.profile= or your shell's equivalent). Note that
-the =export= part is very important.
-
-#+BEGIN_SRC sh
-export PATH=~/.local/bin:$PATH
-#+END_SRC
-
-Users of =fish= should add following line to their =config.fish= file (should be
-in =$XDG_CONFIG_HOME= or its default value - =~/.config/fish=). Note that =-x=
-part is very important.
-
-#+BEGIN_SRC fish
-set -x PATH ~/.local/bin $PATH
-#+END_SRC
-
-Users of other shells should consult its documentation on how to setup =$PATH=
-variable (with export to environment).
-
-So now, =~/.local/bin= should be available in your =$PATH=. You can verify this
-by calling =echo $PATH=. But you also should verify that =$PATH= is set properly
-in your environment. To do so call following command in your terminal.
-
-#+BEGIN_SRC sh
-env | grep "PATH"
-#+END_SRC
-
-This is the value that will be used by Emacs. So it must contain =~/.local/bin=.
-
-After that you can run Spacemacs and check that it properly gets the value of
-=$PATH= by running =M-: (getenv "PATH")=.
-
-Note that having =~/.local.bin= in your =$PATH= also means that it's possible to
-run terminal and call tools from =~/.local/bin= without specifying their full
-path. Under certain conditions you might want to avoid modifying your =$PATH=.
-In that case you have the option of updating the value of =exec-path= in the
-=dotspacemacs/user-config= function of your =.spacemacs= file.
+*** The =exec-path= Variable
+=exec-path= is a list of directories to search for programs to run in subprocesses.
+For example, Emacs usually calls the program =aspell= to provide spell-checking, and 
+the default value of =exec-path= is usually enough for Emacs to find that program. However 
+if Emacs cannot find a certain program, it is necessary to add the program's directory to 
+=exec-path=. To illustrate, to add =npm='s default global-installation directory, place the 
+following in your =dotspacemacs/user-config=:
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'exec-path "~/.local/bin/")
+(add-to-list 'exec-path "/home/<your username>"/.npm-global/bin")
 #+END_SRC
+
+To view the value of =exec-path= in your =*Messages*= buffer, type =M-:=, 
+then =(print exec-path)=, and =RETURN=.
+
+*** Emacs' =PATH= Environment Variable
+In addition to =exec-path=, Emacs defines an environment variable called =PATH= to search for 
+programs that are executed within Emacs' shell environment. This is very similar in concept to 
+the =PATH= in your OS environment, but note that unless you run start and run Emacs within a 
+terminal, Emacs' =PATH= will not reflect the =PATH= defined in your OS environment. To modify Emacs' =PATH=,
+use =(setenv "PATH" <some string>)=. To illustrate, to copy the =PATH= from your own user environment into Emacs' 
+=PATH=, place the following in your =dotspacemacs/user-config=:
+
+#+BEGIN_SRC emacs-lisp
+(setenv "PATH" (shell-command-to-string "echo -n $PATH"))
+#+END_SRC
+
+To view the value of Emacs' =PATH= environment variable, type =M-:", then =(getenv "PATH")=, 
+and =RETURN=.
 
 ** Change or define an alias for a leader key?
 It is possible to change a leader key by binding its keymap to another sequence.
